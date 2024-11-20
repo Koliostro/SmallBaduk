@@ -10,7 +10,6 @@ class Window {
         Window(int size_of_window);
 
         SDL_Window* create_window();
-        SDL_Surface* create_surface(SDL_Window* window);
         void update_window(SDL_Window* window);
 };
 

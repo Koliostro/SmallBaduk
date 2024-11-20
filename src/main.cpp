@@ -1,12 +1,8 @@
 #include "main.h"
 #include "window_system/window.h"
 #include "sprite_system/sprite_system.h"
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_rect.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_surface.h>
-#include <SDL2/SDL_timer.h>
-#include <SDL2/SDL_video.h>
+
+#include <SDL2/SDL_error.h>
 
 int main() {
 
@@ -15,29 +11,42 @@ int main() {
     Window screen(600);
 
     SDL_Window* window = screen.create_window();
-    SDL_Surface* plane = screen.create_surface(window);
+    //SDL_Surface* plane = screen.create_surface(window);
 
     std::vector<PositionOfSprite> VisualTiles;
+    std::vector<Tile> tiles;
 
-    for (short i = 0; i <= 3; i++) {
-        VisualTiles.push_back(PositionOfSprite());
-        
+    VisualTiles.push_back(PositionOfSprite());
+
+    for (short i = 0; i <= 2; i++) {
         VisualTiles[i].xPos = i * 64;
         VisualTiles[i].xOffset = i * 64;
         VisualTiles[i].yOffset = 0;
         VisualTiles[i].yPos = 0;
     }
 
-    Tile blocks[1] = {Tile("../images/test.bmp", 64, &VisualTiles[0])};
+    /* -------*/
+    SDL_Renderer * ren = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 
+    SDL_Surface * load = SDL_LoadBMP("../images/test.bmp");
+    SDL_Texture * tex = SDL_CreateTextureFromSurface(ren, load);
+    SDL_FreeSurface(load);
+    /*-------*/
+
+    for (short i = 0; i <= 2; i++) {
+        tiles.push_back(Tile(64, &VisualTiles[i], ren));
+    }
+   
     bool running = true;
+
     
     // main loop
     while (running) {
         SDL_Event event;
 
-        SDL_Rect srcrect = {0, 0, 64, 64};
-        SDL_Rect dstrect = {0, 0, 64, 64}; 
+        for (short i = 0; i <= 2; i++) {
+            tiles[i].DrawTile(64, ren, tex);
+        }
 
         //event loop
         while(SDL_PollEvent(&event)) {
@@ -47,17 +56,16 @@ int main() {
                     break;
             }
         }
-        blocks[0].drawTile(plane);
-        SDL_UpdateWindowSurface(window);
         
     }
 
 // Thouse statments should be in deconstructor
-    
+    SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(window);
+    SDL_DestroyTexture(tex);
 
     window = NULL;
-    plane = NULL;
+    //plane = NULL;
 
     SDL_Quit();
     IMG_Quit();

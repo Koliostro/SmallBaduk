@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(Baduk)
 
 #Need to change flags to needed
-set(Debug_option "-Wall;-g")
+set(Debug_option "-Wall;-g;-ggdb;-Weffc++")
 set(Release_option "")
 set(Small_option "")
 

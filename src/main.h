@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <SDL2/SDL_render.h>
 
 #ifndef MAIN_H
 #define MAIN_H
