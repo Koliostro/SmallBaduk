@@ -1,6 +1,8 @@
 #include "../window_system/window.h"
 
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_surface.h>
 
 #ifndef SPRITEWORK_H
 #define SPRITEWORK_H
@@ -11,7 +13,7 @@ class SpriteSheet {
         SDL_Surface *image_of_sprite;
 
     public:
-        SpriteSheet(const char * path, short rows, short colms);
+        SpriteSheet(const char * path, short size);
         ~SpriteSheet();
 
         void select_sprite(short x, short y);
@@ -22,14 +24,20 @@ class SpriteSheet {
 #ifndef TILE_H
 #define TILE_H
 
+struct PositionOfSprite {
+    short xPos;
+    short yPos;
+    short xOffset;
+    short yOffset;
+};
+
 class Tile : public SpriteSheet {
     private:
-        short xOffset;
-        short yOffset;
+        PositionOfSprite settings;
+        SDL_Rect position;
 
     public:
-        SDL_Rect position;
-        Tile(const char * path, short * pos, short size, short * offset, short rows, short colms);
+        Tile(const char * path, short size, PositionOfSprite * setting);
         void drawTile(SDL_Surface * window_surface);
 };
 #endif
