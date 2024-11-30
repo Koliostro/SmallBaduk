@@ -16,11 +16,11 @@ Tile::Tile(short size, PositionOfSprite * setting, SDL_Renderer * renderer) {
 
 }
 
-void Tile::DrawTile(short sizeOfsprite, SDL_Renderer * ren, SDL_Texture * tex) {
+void Tile::DrawTile(short sizeOfsprite, SDL_Renderer * ren, SDL_Texture * tex, short sizeOnScreen = 64, const double angle = 0) {
     SDL_Rect dst;
 
-    dst.h = sizeOfsprite;
-    dst.w = sizeOfsprite;
+    dst.h = sizeOnScreen;
+    dst.w = sizeOnScreen;
     dst.x = settings.xPos;
     dst.y = settings.yPos; 
 
@@ -31,8 +31,10 @@ void Tile::DrawTile(short sizeOfsprite, SDL_Renderer * ren, SDL_Texture * tex) {
     src.x = settings.xOffset;
     src.y = settings.yOffset;
 
-    SDL_RenderCopy(ren, tex,&src, &dst);
-    SDL_RenderPresent(ren);
+    //SDL_RenderCopy(ren, tex,&src, &dst);
+    SDL_RenderCopyEx(ren, tex, &src, &dst, angle, NULL, SDL_FLIP_NONE);
+    // Present shoud be present only for debug reason 
+    //SDL_RenderPresent(ren);
 }
 
 void Tile::ChangePos(short newX, short newY) {

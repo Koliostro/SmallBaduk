@@ -1,8 +1,13 @@
 #include "main.h"
 #include "window_system/window.h"
 #include "sprite_system/sprite_system.h"
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_timer.h>
 
-#include <SDL2/SDL_error.h>
+#define SIZE_ON_SCREEN 64
+#define SIZE_OF_SPRITE 16
+
+#define SIZE_OF_BOARD 6
 
 int main() {
 
@@ -13,41 +18,153 @@ int main() {
     SDL_Window* window = screen.create_window();
     //SDL_Surface* plane = screen.create_surface(window);
 
-    std::vector<PositionOfSprite> VisualTiles;
-    std::vector<Tile> tiles;
+    //std::vector<std::vector<PositionOfSprite>> VisualTiles;
+    
+    /*
+     * I'm not really know what is going here. But here were alocate 
+     * objects for board otherwise it will crash
+    */ 
+    std::vector<std::vector<PositionOfSprite>> VisualTiles (SIZE_OF_BOARD, std::vector<PositionOfSprite>(SIZE_OF_BOARD, PositionOfSprite()));
 
-    VisualTiles.push_back(PositionOfSprite());
-
-    for (short i = 0; i <= 2; i++) {
-        VisualTiles[i].xPos = i * 64;
-        VisualTiles[i].xOffset = i * 64;
-        VisualTiles[i].yOffset = 0;
-        VisualTiles[i].yPos = 0;
-    }
+    std::vector<std::vector<Tile>> tiles;
 
     /* -------*/
-    SDL_Renderer * ren = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+    SDL_Renderer * ren = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
 
-    SDL_Surface * load = SDL_LoadBMP("../images/test.bmp");
+    SDL_Surface * load = IMG_Load("../images/test.png");
+//    SDL_Surface * load = SDL_LoadBMP("../images/testing.bmp");
     SDL_Texture * tex = SDL_CreateTextureFromSurface(ren, load);
     SDL_FreeSurface(load);
     /*-------*/
 
-    for (short i = 0; i <= 2; i++) {
-        tiles.push_back(Tile(64, &VisualTiles[i], ren));
+
+
+    for (char i = 0; i <= SIZE_OF_BOARD - 1; i++) {
+        for (char j = 0; j <= SIZE_OF_BOARD - 1; j++) {
+
+            if (i == 0 or i == SIZE_OF_BOARD - 1) {
+                switch (j) {
+                    case 0: 
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xOffset = SIZE_OF_SPRITE;
+                        VisualTiles[i][j].yOffset = 0;
+                        break;
+                    case SIZE_OF_BOARD - 1: 
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xOffset = SIZE_OF_SPRITE;
+                        VisualTiles[i][j].yOffset = 0;
+                        break;
+                    default:
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xOffset = 2 * SIZE_OF_SPRITE;
+                        VisualTiles[i][j].yOffset = 0;
+                        break;
+                }
+            }
+            else {
+                switch (j) {
+                    case 0: 
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xOffset = 2 * SIZE_OF_SPRITE;
+                        VisualTiles[i][j].yOffset = 0;
+                        break;
+                    case SIZE_OF_BOARD - 1: 
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xOffset = 2 * SIZE_OF_SPRITE;
+                        VisualTiles[i][j].yOffset = 0;
+                        break;
+                    default:
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xOffset = 0;
+                        VisualTiles[i][j].yOffset = 0;
+                        break;
+                }
+            }
+        }
     }
-   
+    /*
+     * Here we can't prealocate sizes because
+     * we create a vector of class objects
+     */
+    
+    for (char i = 0; i <= SIZE_OF_BOARD - 1; i++) {
+        std::vector<Tile> Temp;
+        for (char j = 0; j <= SIZE_OF_BOARD - 1; j++) {
+            Temp.push_back(Tile(SIZE_OF_SPRITE, &VisualTiles[i][j], ren));
+        }
+        tiles.push_back(Temp);
+    }
+
     bool running = true;
 
+    Uint64 frameStart, frameTime;
+
+    Uint64 frameDelay = 17;
     
     // main loop
     while (running) {
-        SDL_Event event;
+        
+        frameStart = SDL_GetTicks64();
 
-        for (short i = 0; i <= 2; i++) {
-            tiles[i].DrawTile(64, ren, tex);
+        SDL_RenderClear(ren);
+    // Function to set right angle and display it.
+    // ============================================
+    // The first time it run for all blocks
+    // but later it will run only once per turn
+    // for update reasons
+        double angle;
+        for (char i = 0; i <= SIZE_OF_BOARD - 1; i++) {
+            for (char j = 0; j <= SIZE_OF_BOARD - 1; j++) {
+
+                switch (i) {
+                    case 0:
+                        switch (j) {
+                            case SIZE_OF_BOARD - 1:
+                                angle = 90;
+                                break;
+                            default:
+                                angle = 0;
+                                break;
+                        }
+                        break;
+                    case SIZE_OF_BOARD - 1:
+                        switch(j) {
+                            case 0:
+                                angle = 270;
+                                break;
+                            default:
+                                angle = 180;
+                                break;
+                        }
+                        break;
+                    default:
+                        switch(j) {
+                            case 0:
+                                angle = -90;
+                                break;
+                            case SIZE_OF_BOARD - 1:
+                                angle = 90;
+                                break;
+                        }
+                        break;
+                }
+
+                //======================================================
+
+                tiles[i][j].DrawTile(SIZE_OF_SPRITE, ren, tex, SIZE_ON_SCREEN, angle);
+                angle = 0;
+            }
         }
 
+        SDL_RenderPresent(ren);
+        SDL_Event event;
+        
         //event loop
         while(SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -55,6 +172,12 @@ int main() {
                     running = false;
                     break;
             }
+        }
+
+        frameTime = SDL_GetTicks64() - frameStart;
+
+        if (frameDelay > frameTime) {
+            SDL_Delay(frameDelay - frameTime);
         }
         
     }
