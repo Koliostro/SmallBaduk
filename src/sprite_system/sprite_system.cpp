@@ -42,7 +42,23 @@ void Tile::ChangePos(short newX, short newY) {
     settings.yPos = newY;
 }
 
+// Change the tile to new. If we get -1 we don't change that cord
 void Tile::ChangeSprite(short newX, short newY) {
-    settings.xOffset = newX;
-    settings.yOffset = newY;
+    if (newX != -1) {
+        settings.xOffset = newX;
+    }
+    if (newY != -1) {
+        settings.yOffset = newY;
+    }
+}
+
+// Get offsets of Tile. If coord char is wrong will retuen -1
+short Tile::getCoordinates(char coord) {
+    if (coord == 'x') {
+        return settings.xOffset;
+    }
+    else if (coord == 'y') {
+        return settings.yOffset;
+    }
+    return -1;
 }

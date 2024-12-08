@@ -6,6 +6,9 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_error.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_mouse.h>
+#include <SDL2/SDL_timer.h>
 
 #ifndef MAIN_H
 #define MAIN_H

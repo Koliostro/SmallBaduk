@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(Baduk)
+project(Baduk CXX)
+
+set(CXX_STANDART 23)
+set(CXX_STANDART_REQUIRED ON)
 
 #Need to change flags to needed
 set(Debug_option "-Wall;-g;-ggdb;-Weffc++")

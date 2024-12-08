@@ -1,24 +1,45 @@
 #include "main.h"
 #include "window_system/window.h"
 #include "sprite_system/sprite_system.h"
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_timer.h>
+#include <cmath>
 
 #define SIZE_ON_SCREEN 64
 #define SIZE_OF_SPRITE 16
+#define SIZE_OF_SCREEN 600
 
-#define SIZE_OF_BOARD 6
+#define SIZE_OF_BOARD 8
+
+constexpr short offset() {
+    return (SIZE_OF_SCREEN - SIZE_ON_SCREEN * SIZE_OF_BOARD) >> 1;
+}
+
+//Now we rotate throught all states of tile. Later we need to create way
+//to determine what color of stone need to place. 
+//
+//For this we for sure need a turn system. But the main goal now is
+//creating algorithm for geterming conditions for removing stones.
+void checkClick(SDL_MouseButtonEvent &b, std::vector<std::vector<Tile>> &tiles) {
+    if (b.button == SDL_BUTTON_LEFT) {
+        short xIndex, yIndex;
+
+        xIndex = std::floor(b.x / SIZE_ON_SCREEN) - 1;
+        yIndex = std::floor(b.y / SIZE_ON_SCREEN) - 1;
+        
+        if (tiles[yIndex][xIndex].getCoordinates('y') == 2 * SIZE_OF_SPRITE) {
+            tiles[yIndex][xIndex].ChangeSprite(-1, 0);
+        }
+        else {
+            tiles[yIndex][xIndex].ChangeSprite(-1, tiles[yIndex][xIndex].getCoordinates('y') + SIZE_OF_SPRITE);
+        }
+    }
+}
 
 int main() {
-
     SDL_Init(SDL_INIT_EVERYTHING);
     
-    Window screen(600);
+    Window screen(SIZE_OF_SCREEN);
 
     SDL_Window* window = screen.create_window();
-    //SDL_Surface* plane = screen.create_surface(window);
-
-    //std::vector<std::vector<PositionOfSprite>> VisualTiles;
     
     /*
      * I'm not really know what is going here. But here were alocate 
@@ -32,12 +53,9 @@ int main() {
     SDL_Renderer * ren = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
 
     SDL_Surface * load = IMG_Load("../images/test.png");
-//    SDL_Surface * load = SDL_LoadBMP("../images/testing.bmp");
     SDL_Texture * tex = SDL_CreateTextureFromSurface(ren, load);
     SDL_FreeSurface(load);
     /*-------*/
-
-
 
     for (char i = 0; i <= SIZE_OF_BOARD - 1; i++) {
         for (char j = 0; j <= SIZE_OF_BOARD - 1; j++) {
@@ -45,20 +63,20 @@ int main() {
             if (i == 0 or i == SIZE_OF_BOARD - 1) {
                 switch (j) {
                     case 0: 
-                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
-                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN + offset();
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN + offset();
                         VisualTiles[i][j].xOffset = SIZE_OF_SPRITE;
                         VisualTiles[i][j].yOffset = 0;
                         break;
                     case SIZE_OF_BOARD - 1: 
-                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
-                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN + offset();
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN + offset();
                         VisualTiles[i][j].xOffset = SIZE_OF_SPRITE;
                         VisualTiles[i][j].yOffset = 0;
                         break;
                     default:
-                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
-                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN + offset();
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN + offset();
                         VisualTiles[i][j].xOffset = 2 * SIZE_OF_SPRITE;
                         VisualTiles[i][j].yOffset = 0;
                         break;
@@ -67,20 +85,20 @@ int main() {
             else {
                 switch (j) {
                     case 0: 
-                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
-                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN + offset();
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN + offset();
                         VisualTiles[i][j].xOffset = 2 * SIZE_OF_SPRITE;
                         VisualTiles[i][j].yOffset = 0;
                         break;
                     case SIZE_OF_BOARD - 1: 
-                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
-                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN + offset();
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN + offset();
                         VisualTiles[i][j].xOffset = 2 * SIZE_OF_SPRITE;
                         VisualTiles[i][j].yOffset = 0;
                         break;
                     default:
-                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN;
-                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN;
+                        VisualTiles[i][j].xPos = j * SIZE_ON_SCREEN + offset();
+                        VisualTiles[i][j].yPos = i * SIZE_ON_SCREEN + offset();
                         VisualTiles[i][j].xOffset = 0;
                         VisualTiles[i][j].yOffset = 0;
                         break;
@@ -170,6 +188,9 @@ int main() {
             switch (event.type) {
                 case SDL_QUIT:
                     running = false;
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    checkClick(event.button, tiles);
                     break;
             }
         }
