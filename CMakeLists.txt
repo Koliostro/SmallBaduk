@@ -1,19 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(Baduk)
+set(CMAKE_BUILD_TYPE Release)
 
-#Need to change flags to needed
-set(Debug_option "-Wall;-g")
-set(Release_option "")
-set(Small_option "")
+set(CXX_STANDART 11)
+set(CXX_STANDART_REQUIRED ON)
 
-set(Release_option_link "Wl, --gc-sections, --fwhole-program, -s, --build-id=none")
-set(Small_option_link "-Wl, --gc-sections")
-
-set(CMAKE_CONFIGURATION_TYPES "Release;Debug;Small")
-set(CMAKE_DEFAULT_BUILD_TYPE "Debug")
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(Name Baduk)
 
 set(SOURCES
     src/main.cpp
@@ -21,36 +13,34 @@ set(SOURCES
     src/sprite_system/sprite_system.cpp
 )
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
+if (isDebug)
+    add_compile_options(-Wall -Wextra -Wpedantic -ggdb)
+endif()
 
-include_directories(src)
+project(${Name} CXX)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${Name} ${SOURCES})
 
-target_compile_options(
-    ${PROJECT_NAME}
+find_package(SDL2 CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+    # $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+    SDL2::SDL2main
+    $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+)
+
+find_package(SDL2_image CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>)
+
+if (WIN32)
+    add_definitions(-DSDL_MAIN_HANDELED)
+    #add_link_options(-mwindows)
+    
+    target_compile_definitions(${Name}
     PUBLIC
-    "$<$<CONFIG:Debug>:${Debug_option}>")
-
-target_compile_options(
-    ${PROJECT_NAME}
-    PUBLIC
-    "$<$<CONFIG:Release>:${Release_option}>")
-
-target_compile_options(
-    ${PROJECT_NAME}
-    PUBLIC
-    "$<$<CONFIG:Small>:${Small_option}>")
-
-target_link_libraries(${PROJECT_NAME} SDL2::Main SDL2::Image)
-
-target_link_options(
-    ${PROJECT_NAME}
-    PUBLIC
-    "$<$<CONFIG:Release>:${Release_option_link}>")
-
-target_link_options(
-    ${PROJECT_NAME}
-    PUBLIC
-    "$<$<CONFIG:Small>:${Small_option_link}>")
+      $<$<CONFIG:Debug>:OE_DEBUG>
+      $<$<CONFIG:RelWithDebInfo>:OE_DEBUG>
+      $<$<CONFIG:Release>:OE_RELEASE>
+      $<$<CONFIG:MinSizeRel>:OE_RELEASE>
+)    
+endif()

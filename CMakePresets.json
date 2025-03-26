@@ -1,0 +1,42 @@
+﻿{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "base",
+            "description": "Сделать целевой ОС Windows со средой разработки Visual Studio.",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        },
+        {
+            "name": "linux-base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "description": "Сделать целевой ОС Windows (64-разрядная версия) со средой разработки Visual Studio. (Debug)",
+            "inherits": "base",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": { 
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" 
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "description": "Сделать целевой ОС Windows (64-разрядная версия) со средой разработки Visual Studio. (RelWithDebInfo)",
+            "inherits": "debug",
+            "cacheVariables": { 
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            }
+        }
+    ]
+}

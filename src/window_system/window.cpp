@@ -12,12 +12,6 @@ SDL_Window* Window::create_window() {
     return window;
 }
 
-SDL_Surface* Window::create_surface(SDL_Window* window) {
-    SDL_Surface* surface = SDL_GetWindowSurface(window);
-
-    return surface;
-}
-
 void update_window(SDL_Window* window) {
     SDL_UpdateWindowSurface(window);
 }
